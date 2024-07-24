@@ -9,7 +9,7 @@
 .logInContainer{
     width: 50vw;
     height: 70vh;
-    border: 2px blue solid;
+    border: 2px #23c7c9 solid;
     /* background-color: blue; */
     display: flex;
     flex-direction: column;
