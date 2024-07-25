@@ -12,16 +12,16 @@
   display: flex;
   align-items: center;
   padding: 10px;
-
 }
 
-.date{
-    color: white;
+.date {
+  color: white;
 }
 
 #headerIcons {
   font-size: 2rem;
   color: white;
+  cursor: pointer;
 }
 
 .name {
@@ -42,20 +42,22 @@
   justify-content: space-evenly;
 }
 
-.search input{
-    background-color: transparent;
-    border: 1px solid white;
-    border-radius: 5px;
-    height: 1.8rem;
+.search input {
+  background-color: transparent;
+  border: 1px solid white;
+  border-radius: 5px;
+  height: 1.8rem;
 }
 
 .tasks {
   width: 100%;
   height: 80%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px,3fr));
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(400px, 3fr));
+  /* grid-template-rows: repeat(3, 1fr); */
+  grid-auto-rows: 150px;
   gap: 10px;
+  overflow: scroll;
 }
 
 .taskCard {
@@ -82,7 +84,7 @@ grid-row:1/5 ; */
   text-align: center;
   justify-content: center;
   align-items: center;
-  background-color: #F7F7F7;
+  background-color: #f7f7f7;
 }
 
 .taskIcon {
@@ -96,49 +98,53 @@ grid-row:1/5 ; */
   background-color: #23c7c9;
 }
 
-#taskTime{
-    /* font-weight: 100; */
-    font-size: .8rem;
+#taskTime {
+  /* font-weight: 100; */
+  font-size: 0.8rem;
 }
 
-.addButton{
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin: 10px;
+.addButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 10px;
 }
 
-.addButton button{
-    background-color: orangered;
-    width: 8rem;
-    height: 7.8rem;
-    color: white;
-    font-size: 5rem;
-    border: none;
-    cursor: pointer;
+.addButton button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: orangered;
+  width: 8rem;
+  height: 7.8rem;
+  color: white;
+  font-size: 5rem;
+  border: none;
+  cursor: pointer;
 }
 
 .modal,
-.overlay{
+.overlay {
   width: 100vw;
   height: 100vh;
-  top: 5;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   position: fixed;
+  overflow: hidden;
 }
 
-.overlay{
+.overlay {
   background: rgba(49, 49, 49, 0.8);
 }
 
-.modalContent{
+.modalContent {
   position: absolute;
-  top: 40%;
+  top: 50%;
   left: 50%;
-  transform: translate(-50%,-50%);
-  line-height: 1.4;
+  transform: translate(-50%, -50%);
+  line-height: 0.4;
   background: #f1f1f1;
   padding: 14px 28px;
   border-radius: 3px;
@@ -146,9 +152,71 @@ grid-row:1/5 ; */
   min-width: 300px;
 }
 
-.closeModal{
+.closeModal {
   position: absolute;
   top: 10px;
   right: 10px;
   padding: 5px 7px;
+  color: red;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.header #myLinks {
+    display: none;
+  }
+
+@media (max-width: 1024px) {
+  .addButton button {
+    width: 6rem;
+    height: 6.2rem;
+    border-radius: 50%;
+  }
+
+  .todoContainer {
+    width: 95vw;
+    height: 95vh;
+  }
+}
+
+@media (max-width: 855px) {
+  .tasks {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 250px;
+  }
+}
+
+@media (max-width: 507px) {
+  .addButton button {
+    font-size: 2.5rem;
+    width: 6rem;
+    height: 3rem;
+    border-radius: 0;
+  }
+
+  .todoContainer {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .taskIcon {
+    margin-right: 5px;
+  }
+
+  .taskDate {
+    margin-left: 0;
+  }
+
+
+  .name {
+    font-size: 1rem;
+  }
+
+  .dateContainer input {
+    width: 100px;
+  }
+
+  .date p {
+    font-size: .7rem;
+  }
 }
