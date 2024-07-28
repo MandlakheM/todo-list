@@ -74,7 +74,8 @@ grid-row:1/5 ; */
 .time {
   width: auto;
   font-size: 1rem;
-  margin-right: auto;
+  /* margin-right: auto; */
+  overflow: hidden;
 }
 
 .taskDate {
@@ -85,6 +86,7 @@ grid-row:1/5 ; */
   justify-content: center;
   align-items: center;
   background-color: #f7f7f7;
+  margin-left: auto;
 }
 
 .taskIcon {
