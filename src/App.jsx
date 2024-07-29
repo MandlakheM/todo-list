@@ -1,21 +1,42 @@
-import './App.css'
-import LogIn from './components/logIn'
-import Todo from './components/todo'
-import DateRangeCalendarCalendarsProp from "./components/materialUI/calender";
-import TemporaryDrawer from "./components/materialUI/mobileMenu";
+import "./App.css";
+import LogIn from "./components/logIn";
+import Todo from "./components/todo";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
+import { RedirectToSignIn, SignedIn, SignedOut } from "@clerk/clerk-react";
 
-
-
-function App() {
-
-  return (
+const router = createBrowserRouter(
+  createRoutesFromElements(
     <>
-    {/* <LogIn/> */}
-    <Todo/>
-    {/* <DateRangeCalendarCalendarsProp /> */}
-    {/* <TemporaryDrawer/> */}
+      <Route index element={<LogIn />} />
+      <Route
+        path="/todo"
+        element={
+          <>
+            <SignedIn>
+              <Todo />
+            </SignedIn>
+
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
+          </>
+        }
+      />
     </>
   )
+);
+
+function App() {
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
-export default App
+export default App;

@@ -1,6 +1,6 @@
 import React from "react";
 import "./todo.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LuListTodo } from "react-icons/lu";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { CiBurger } from "react-icons/ci";
@@ -16,6 +16,10 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import dayjs from "dayjs";
+import { UserButton } from '@clerk/clerk-react';
+import axios from "axios";
+
+
 
 
 function Todo() {
@@ -28,6 +32,12 @@ function Todo() {
     importance: "",
   });
   const [open, setOpen] = React.useState(false);
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/tasks").then((response) => {
+      setTasks(response.data);
+    });
+  }, []);
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -56,15 +66,37 @@ function Todo() {
     }));
   }
 
+  // function addTasks() {
+  //   if (newTask.taskName.trim() !== "") {
+  //     setTasks((prevTasks) => [...prevTasks, newTask]);
+  //     setNewTask({
+  //       taskName: "",
+  //       taskTime: dayjs().format("HH:mm"),
+  //       taskDate: dayjs(),
+  //       importance: "",
+  //     });
+  //   }
+  // }
+
   function addTasks() {
     if (newTask.taskName.trim() !== "") {
-      setTasks((prevTasks) => [...prevTasks, newTask]);
-      setNewTask({
-        taskName: "",
-        taskTime: dayjs().format("HH:mm"),
-        taskDate: dayjs(),
-        importance: "",
-      });
+      const currentTime = dayjs().format("HH:mm:ss");
+      axios
+        .post("http://localhost:3001/tasks", {
+          ...newTask,
+          taskDate: newTask.taskDate.toISOString(),
+          taskCreationTime: currentTime,
+        })
+        .then((response) => {
+          setTasks((prevTasks) => [...prevTasks, response.data]);
+          setNewTask({
+            taskName: "",
+            taskTime: "",
+            taskDate: dayjs(),
+            importance: "",
+            taskCreationTime: dayjs().format("HH:mm"),
+          });
+        });
     }
   }
 
@@ -120,7 +152,9 @@ function Todo() {
             </div>
           </div>
           <div className="menu">
-            <GiHamburgerMenu id="headerIcons" onClick={toggleDrawer(true)} />
+          <UserButton />
+
+            {/* <GiHamburgerMenu id="headerIcons" onClick={toggleDrawer(true)} /> */}
             <Drawer open={open} anchor="right" onClose={toggleDrawer(false)}>
               {DrawerList}
             </Drawer>
@@ -146,7 +180,7 @@ function Todo() {
               </div>
               <div className="taskDate">
               <p>
-                  {task.taskDate ? task.taskDate.format("dddd MMM DD") : ""} 
+                  {/* {task.taskDate ? task.taskDate.format("dddd MMM DD") : ""}  */}
                   {task.importance}
                 </p>
               </div>
