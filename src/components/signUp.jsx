@@ -1,6 +1,7 @@
 import React from "react";
 import "./logIn.css";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -13,6 +14,9 @@ function SignUp() {
     password: "",
     id: dayjs(),
   });
+
+  const navigate = useNavigate();
+
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -37,7 +41,7 @@ function SignUp() {
       axios
         .post("http://localhost:3030/users", currentUser)
         .then((res) => {
-          alert("Data added successfully!");
+            navigate("/");
         })
         .catch((err) => console.log(err));
     }
@@ -73,7 +77,7 @@ function SignUp() {
               />
               <button>Sign Up</button>
               <p>
-                Already have an account ? <a href="">Sign In</a>
+                Already have an account ?<Link to={'/'}>Sign In</Link>
               </p>
             </form>
           </div>

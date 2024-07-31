@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./todo.css";
-import { useState, useEffect } from "react";
 import { LuListTodo } from "react-icons/lu";
 import { CiBurger } from "react-icons/ci";
 import { MdAdd } from "react-icons/md";
@@ -21,15 +20,20 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { Link } from "react-router-dom";
+
 import { MdDeleteForever } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import axios from "axios";
+import Skeleton from "@mui/material/Skeleton";
 
 function Todo() {
   const [modal, setModal] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [tasks, setTasks] = useState([]);
-  const [search, setSearch] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState({
     taskName: "",
     taskTime: dayjs().format("HH:mm"),
@@ -40,9 +44,21 @@ function Todo() {
   useEffect(() => {
     axios
       .get("http://localhost:3030/tasks")
-      .then((res) => setTasks(res.data))
+      .then((res) => {
+        setTasks(res.data);
+        setFilteredTasks(res.data);
+        setLoading(false);
+      })
       .catch((err) => console.log(err));
   }, []);
+
+  useEffect(() => {
+    setFilteredTasks(
+      tasks.filter((task) =>
+        task.taskName.toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  }, [search, tasks]);
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -74,6 +90,7 @@ function Todo() {
   function addTasks() {
     if (newTask.taskName.trim() !== "") {
       setTasks((prevTasks) => [...prevTasks, newTask]);
+      setFilteredTasks((prevTasks) => [...prevTasks, newTask]);
       setNewTask({
         taskName: "",
         taskTime: dayjs().format("HH:mm"),
@@ -96,12 +113,16 @@ function Todo() {
   }
 
   function handleDelete(id) {
-    const confirm = window.confirm("do you want to delete this taks");
+    const confirm = window.confirm("Do you want to delete this task?");
     if (confirm) {
       axios
         .delete("http://localhost:3030/tasks/" + id)
         .then((res) => {
-          alert("Tasks deleted");
+          alert("Task deleted");
+          setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+          setFilteredTasks((prevTasks) =>
+            prevTasks.filter((task) => task.id !== id)
+          );
         })
         .catch((err) => console.log(err));
     }
@@ -118,6 +139,7 @@ function Todo() {
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <AccountCircleIcon sx={{ fontSize: 100 }} />
+      <Link to={"/"}>Sign Out</Link>
     </Box>
   );
 
@@ -159,8 +181,6 @@ function Todo() {
             </div>
           </div>
           <div className="menu">
-            <UserButton />
-
             <GiHamburgerMenu id="headerIcons" onClick={toggleDrawer(true)} />
             <Drawer open={open} anchor="right" onClose={toggleDrawer(false)}>
               {DrawerList}
@@ -169,42 +189,42 @@ function Todo() {
         </div>
 
         <div className="tasks">
-          {tasks
-            .filter((task) => {
-              return () =>
-                search.toLowerCase() === ""
-                  ? task
-                  : task.taskName.toLowerCase().includes(search);
-            })
-            .map((task, index) => (
-              <div className="taskCard" key={index}>
-                <div className="taskIcon">
-                  <CiBurger id="headerIcons" />
+          {loading
+            ? Array.from(new Array(5)).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  variant="rectangular"
+                  width="100%"
+                  height={60}
+                />
+              ))
+            : filteredTasks.map((task, index) => (
+                <div className="taskCard" key={index}>
+                  <div className="taskIcon">
+                    <CiBurger id="headerIcons" />
+                  </div>
+                  <div className="time">
+                    <p id="taskTime">Task created on: {task.taskTime}</p>
+                    <p>{task.taskName}</p>
+                  </div>
+                  <div
+                    className="taskDate"
+                    style={{
+                      borderLeft: `3px solid ${getBorderColor(
+                        task.importance
+                      )}`,
+                    }}
+                  >
+                    <p>
+                      <MdDeleteForever
+                        id="delete"
+                        onClick={() => handleDelete(task.id)}
+                      />
+                      <FaEdit id="edit" />
+                    </p>
+                  </div>
                 </div>
-                <div className="time">
-                  <p id="taskTime">Task created on: {task.taskTime}</p>
-                  <p>{task.taskName}</p>
-                </div>
-
-                <div
-                  className="taskDate"
-                  style={{
-                    borderLeft: `3px solid ${getBorderColor(task.importance)}`,
-                  }}
-                >
-                  <p>
-                    {/* {task.taskDate
-                      ? () => task.taskDate.format("dddd MMM DD")
-                      : ""} */}
-                    <MdDeleteForever
-                      id="delete"
-                      onClick={(e) => handleDelete(task.id)}
-                    />
-                    <FaEdit id="edit" />
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
         </div>
 
         <div className="addButton">
