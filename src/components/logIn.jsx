@@ -1,36 +1,18 @@
 import React from "react";
 import "./logIn.css";
 import { useState } from 'react';
-import { useSignUp } from '@clerk/clerk-react';
-// import { useRouter } from 'next/navigation';
-// import {  useRouter } from 'react-router-dom'
-import { SignInButton } from '@clerk/clerk-react';
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 
 
 
 function LogIn() {
-
-  const { isLoaded, signUp, setActive } = useSignUp();
+ 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!isLoaded) {
-      return;
-    }
-
-    try {
-      await signUp.create({
-        email_address: email,
-        password,
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+ 
 
 
   return (
@@ -61,12 +43,9 @@ function LogIn() {
                 onChange={(e) => setPassword(e.target.value)}
                 required={true}
               />
-              {/* <button type="submit">Sign In</button> */}
-
+              <button>Sign In</button>
               <p>Don't have an account? <a href="">Sign Up</a></p>
             </form>
-            <SignInButton mode="modal" redirectUrl="/todo"/>
-
           </div>
         </div>
       </div>

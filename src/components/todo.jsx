@@ -2,7 +2,6 @@ import React from "react";
 import "./todo.css";
 import { useState, useEffect } from "react";
 import { LuListTodo } from "react-icons/lu";
-import { GiHamburgerMenu } from "react-icons/gi";
 import { CiBurger } from "react-icons/ci";
 import { MdAdd } from "react-icons/md";
 import { ImCross } from "react-icons/im";
@@ -11,32 +10,38 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import TextField from "@mui/material/TextField";
-import RowRadioButtonsGroup from "./materialUI/radioGroup";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import dayjs from "dayjs";
-import { UserButton } from '@clerk/clerk-react';
+import { UserButton } from "@clerk/clerk-react";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { MdDeleteForever } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
 import axios from "axios";
-
-
-
 
 function Todo() {
   const [modal, setModal] = useState(false);
+  const [open, setOpen] = React.useState(false);
   const [tasks, setTasks] = useState([]);
+  const [search, setSearch] = useState([]);
   const [newTask, setNewTask] = useState({
     taskName: "",
     taskTime: dayjs().format("HH:mm"),
     taskDate: dayjs(),
     importance: "",
   });
-  const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/tasks").then((response) => {
-      setTasks(response.data);
-    });
+    axios
+      .get("http://localhost:3030/tasks")
+      .then((res) => setTasks(res.data))
+      .catch((err) => console.log(err));
   }, []);
 
   const toggleDrawer = (newOpen) => () => {
@@ -66,44 +71,40 @@ function Todo() {
     }));
   }
 
-  // function addTasks() {
-  //   if (newTask.taskName.trim() !== "") {
-  //     setTasks((prevTasks) => [...prevTasks, newTask]);
-  //     setNewTask({
-  //       taskName: "",
-  //       taskTime: dayjs().format("HH:mm"),
-  //       taskDate: dayjs(),
-  //       importance: "",
-  //     });
-  //   }
-  // }
-
   function addTasks() {
     if (newTask.taskName.trim() !== "") {
-      const currentTime = dayjs().format("HH:mm:ss");
-      axios
-        .post("http://localhost:3001/tasks", {
-          ...newTask,
-          taskDate: newTask.taskDate.toISOString(),
-          taskCreationTime: currentTime,
-        })
-        .then((response) => {
-          setTasks((prevTasks) => [...prevTasks, response.data]);
-          setNewTask({
-            taskName: "",
-            taskTime: "",
-            taskDate: dayjs(),
-            importance: "",
-            taskCreationTime: dayjs().format("HH:mm"),
-          });
-        });
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+      setNewTask({
+        taskName: "",
+        taskTime: dayjs().format("HH:mm"),
+        taskDate: dayjs(),
+        importance: "",
+      });
     }
   }
 
   function handleSubmit(event) {
     event.preventDefault();
     addTasks();
+    axios
+      .post("http://localhost:3030/tasks", newTask)
+      .then((res) => {
+        alert("Data added successfully!");
+      })
+      .catch((err) => console.log(err));
     setModal(false);
+  }
+
+  function handleDelete(id) {
+    const confirm = window.confirm("do you want to delete this taks");
+    if (confirm) {
+      axios
+        .delete("http://localhost:3030/tasks/" + id)
+        .then((res) => {
+          alert("Tasks deleted");
+        })
+        .catch((err) => console.log(err));
+    }
   }
 
   const activateModal = () => {
@@ -126,10 +127,8 @@ function Todo() {
         return "red";
       case "slightly":
         return "yellow";
-      case "average":
-        return "green";
       default:
-        return "transparent";
+        return "green";
     }
   };
 
@@ -147,45 +146,65 @@ function Todo() {
             <div className="date">
               <p>{dayjs().format("YYYY-MM-DD")}</p>
             </div>
-            <div className="search">
-              <input type="text" />
+            <div className="wrap-input-17">
+              <div className="search-box">
+                <button className="btn-search">🔍</button>
+                <input
+                  type="text"
+                  className="input-search"
+                  placeholder="Type to Search..."
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
             </div>
           </div>
           <div className="menu">
-          <UserButton />
+            <UserButton />
 
-            {/* <GiHamburgerMenu id="headerIcons" onClick={toggleDrawer(true)} /> */}
+            <GiHamburgerMenu id="headerIcons" onClick={toggleDrawer(true)} />
             <Drawer open={open} anchor="right" onClose={toggleDrawer(false)}>
               {DrawerList}
             </Drawer>
           </div>
-          <div id="myLinks">
-            <a href="#news">News</a>
-            <a href="#contact">Contact</a>
-            <a href="#about">About</a>
-          </div>
         </div>
 
         <div className="tasks">
-          {tasks.map((task, index) => (
-            <div className="taskCard" key={index}
-            style={{ border: `2px solid ${getBorderColor(task.importance)}` }}
-            >
-              <div className="taskIcon">
-                <CiBurger id="headerIcons" />
+          {tasks
+            .filter((task) => {
+              return () =>
+                search.toLowerCase() === ""
+                  ? task
+                  : task.taskName.toLowerCase().includes(search);
+            })
+            .map((task, index) => (
+              <div className="taskCard" key={index}>
+                <div className="taskIcon">
+                  <CiBurger id="headerIcons" />
+                </div>
+                <div className="time">
+                  <p id="taskTime">Task created on: {task.taskTime}</p>
+                  <p>{task.taskName}</p>
+                </div>
+
+                <div
+                  className="taskDate"
+                  style={{
+                    borderLeft: `3px solid ${getBorderColor(task.importance)}`,
+                  }}
+                >
+                  <p>
+                    {/* {task.taskDate
+                      ? () => task.taskDate.format("dddd MMM DD")
+                      : ""} */}
+                    <MdDeleteForever
+                      id="delete"
+                      onClick={(e) => handleDelete(task.id)}
+                    />
+                    <FaEdit id="edit" />
+                  </p>
+                </div>
               </div>
-              <div className="time">
-                <p id="taskTime">Task created on: {task.taskTime}</p>
-                <p>{task.taskName}</p>
-              </div>
-              <div className="taskDate">
-              <p>
-                  {/* {task.taskDate ? task.taskDate.format("dddd MMM DD") : ""}  */}
-                  {task.importance}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         <div className="addButton">
@@ -217,11 +236,34 @@ function Todo() {
                 />
                 <br />
                 <br />
-                <RowRadioButtonsGroup
-                  name="importance"
-                  value={newTask.importance}
-                  onChange={handleImportanceChange}
-                />
+                <FormControl>
+                  <FormLabel id="demo-row-radio-buttons-group-label">
+                    Importance
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="demo-row-radio-buttons-group-label"
+                    name="importance"
+                    value={newTask.importance}
+                    onChange={handleImportanceChange}
+                  >
+                    <FormControlLabel
+                      value="very"
+                      control={<Radio />}
+                      label="Very"
+                    />
+                    <FormControlLabel
+                      value="slightly"
+                      control={<Radio />}
+                      label="Slightly"
+                    />
+                    <FormControlLabel
+                      value="average"
+                      control={<Radio />}
+                      label="Average"
+                    />
+                  </RadioGroup>
+                </FormControl>
                 <br />
                 <Button variant="outlined" onClick={handleSubmit}>
                   ADD TASK

@@ -1,0 +1,55 @@
+{
+  "tasks": [
+    {
+      "id": "1678",
+      "taskName": "go to mlab",
+      "taskTime": "09:43",
+      "taskDate": "2024-07-31T07:43:01.661Z",
+      "importance": "very"
+    },
+    {
+      "id": "fcff",
+      "taskName": "go eat",
+      "taskTime": "09:43",
+      "taskDate": "2024-08-05T07:43:01.000Z",
+      "importance": "slightly"
+    },
+    {
+      "id": "da98",
+      "taskName": "add the authentication page to this project",
+      "taskTime": "10:41",
+      "taskDate": "2024-07-31T08:41:37.323Z",
+      "importance": "very"
+    },
+    {
+      "id": "07bd",
+      "taskName": "play fifa in the afternoon",
+      "taskTime": "10:56",
+      "taskDate": "2024-07-31T08:56:20.855Z",
+      "importance": ""
+    },
+    {
+      "id": "2750",
+      "taskName": "go eat",
+      "taskTime": "12:35",
+      "taskDate": "2024-08-04T10:35:38.000Z",
+      "importance": ""
+    }
+  ],
+  "users": [
+    {
+      "userName": "admin",
+      "password": "admin123"
+    },
+    {
+      "id": "9931",
+      "username": "me@gmail.com",
+      "password": "12345"
+    },
+    {
+      "id": "2024-07-31T10:48:51.647Z",
+      "username": "u@gmail.com",
+      "password": "12345"
+    }
+  ]
+}
