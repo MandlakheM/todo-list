@@ -13,7 +13,6 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import dayjs from "dayjs";
-import { UserButton } from "@clerk/clerk-react";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -26,10 +25,12 @@ import { MdDeleteForever } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import axios from "axios";
 import Skeleton from "@mui/material/Skeleton";
+import { toast } from "react-toastify";
 
 function Todo() {
+  const userId = localStorage.getItem("userId");
   const [modal, setModal] = useState(false);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [search, setSearch] = useState("");
@@ -39,18 +40,23 @@ function Todo() {
     taskTime: dayjs().format("HH:mm"),
     taskDate: dayjs(),
     importance: "",
+    taskID: userId,
   });
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3030/tasks")
-      .then((res) => {
-        setTasks(res.data);
-        setFilteredTasks(res.data);
-        setLoading(false);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+    if (userId) {
+      fetch(`http://localhost:3030/tasks?taskID=${userId}`)
+        .then((res) => res.json())
+        .then((resp) => {
+          setTasks(resp);
+          setFilteredTasks(resp);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.error(err.message);
+        });
+    }
+  }, [userId]);
 
   useEffect(() => {
     setFilteredTasks(
@@ -64,30 +70,30 @@ function Todo() {
     setOpen(newOpen);
   };
 
-  function handleChange(event) {
+  const handleChange = (event) => {
     const { name, value } = event.target;
     setNewTask((prevTask) => ({
       ...prevTask,
       [name]: value,
     }));
-  }
+  };
 
-  function handleDateChange(newValue) {
+  const handleDateChange = (newValue) => {
     setNewTask((prevTask) => ({
       ...prevTask,
       taskDate: newValue,
     }));
-  }
+  };
 
-  function handleImportanceChange(event) {
+  const handleImportanceChange = (event) => {
     const { value } = event.target;
     setNewTask((prevTask) => ({
       ...prevTask,
       importance: value,
     }));
-  }
+  };
 
-  function addTasks() {
+  const addTasks = () => {
     if (newTask.taskName.trim() !== "") {
       setTasks((prevTasks) => [...prevTasks, newTask]);
       setFilteredTasks((prevTasks) => [...prevTasks, newTask]);
@@ -96,37 +102,42 @@ function Todo() {
         taskTime: dayjs().format("HH:mm"),
         taskDate: dayjs(),
         importance: "",
+        taskID: userId,
       });
     }
-  }
+  };
 
-  function handleSubmit(event) {
+  const handleSubmit = (event) => {
     event.preventDefault();
     addTasks();
     axios
       .post("http://localhost:3030/tasks", newTask)
       .then((res) => {
-        alert("Data added successfully!");
+        toast.success("Task added successfully");
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        toast.error(err.message);
+      });
     setModal(false);
-  }
+  };
 
-  function handleDelete(id) {
+  const handleDelete = (id) => {
     const confirm = window.confirm("Do you want to delete this task?");
     if (confirm) {
       axios
-        .delete("http://localhost:3030/tasks/" + id)
+        .delete(`http://localhost:3030/tasks/${id}`)
         .then((res) => {
-          alert("Task deleted");
+          toast.success("Task removed");
           setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
           setFilteredTasks((prevTasks) =>
             prevTasks.filter((task) => task.id !== id)
           );
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          toast.error(err.message);
+        });
     }
-  }
+  };
 
   const activateModal = () => {
     setModal(true);
@@ -190,7 +201,7 @@ function Todo() {
 
         <div className="tasks">
           {loading
-            ? Array.from(new Array(5)).map((_, index) => (
+            ? Array.from(new Array(3)).map((_, index) => (
                 <Skeleton
                   key={index}
                   variant="rectangular"

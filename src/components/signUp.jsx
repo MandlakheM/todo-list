@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
+import { toast } from "react-toastify";
+
 
 // import {  useRouter } from 'react-router-dom'
 
@@ -12,11 +14,10 @@ function SignUp() {
   const [currentUser, setCurrentUser] = useState({
     username: "",
     password: "",
-    id: dayjs(),
+    userId: dayjs(),
   });
 
   const navigate = useNavigate();
-
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -41,9 +42,12 @@ function SignUp() {
       axios
         .post("http://localhost:3030/users", currentUser)
         .then((res) => {
-            navigate("/");
+          toast.success("User SignUp successful");
+          navigate("/");
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          toast.error("SignUp Failed due to :" + err.message);
+        });
     }
   }
 
@@ -77,7 +81,7 @@ function SignUp() {
               />
               <button>Sign Up</button>
               <p>
-                Already have an account ?<Link to={'/'}>Sign In</Link>
+                Already have an account ?<Link to={"/"}>Sign In</Link>
               </p>
             </form>
           </div>

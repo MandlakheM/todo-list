@@ -73,10 +73,10 @@ grid-row:1/5 ; */
 }
 
 .time {
-  width: auto;
+  width: 50%;
   font-size: 1rem;
-  /* margin-right: auto; */
-  overflow: hidden;
+  margin-right: auto;
+  /* overflow: hidden; */
 }
 
 .taskDate {
