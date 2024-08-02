@@ -72,6 +72,11 @@ grid-template-rows: subgrid;
 grid-row:1/5 ; */
 }
 
+.taskCard:hover {
+  /* background-color: #f7f7f7; */
+  border: 1px solid #23c7c9;
+}
+
 .time {
   width: 50%;
   font-size: 1rem;
@@ -90,7 +95,7 @@ grid-row:1/5 ; */
   margin-left: auto;
 }
 
-.actions{
+.actions {
   margin-left: auto;
 }
 
@@ -110,15 +115,14 @@ grid-row:1/5 ; */
   font-size: 0.8rem;
 }
 
-#delete{
+#delete {
   justify-self: flex-end;
   font-size: 1.5rem;
   color: red;
   cursor: pointer;
-
 }
 
-#edit{
+#edit {
   justify-self: flex-end;
   font-size: 1.5rem;
   color: green;
@@ -136,13 +140,29 @@ grid-row:1/5 ; */
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: orangered;
+  background-color: #fe9d0b;
   width: 8rem;
   height: 7.8rem;
   color: white;
   font-size: 5rem;
   border: none;
   cursor: pointer;
+  -webkit-animation: pulse 2s infinite;
+  animation: pulse 2s infinite;
+  border: 1px solid;
+  box-shadow: 0 0 0 0.5em transparent;
+  overflow: hidden;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 #f49301;
+  }
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 #f49301;
+  }
 }
 
 .modal,
@@ -186,16 +206,15 @@ grid-row:1/5 ; */
 
 .wrap-input-17 * {
   box-sizing: border-box;
-  
- }
- 
- .wrap-input-17 .search-box{
+}
+
+.wrap-input-17 .search-box {
   width: fit-content;
   height: fit-content;
   position: relative;
- }
- 
- .wrap-input-17 .input-search{
+}
+
+.wrap-input-17 .input-search {
   height: 50px;
   width: 50px;
   border-style: none;
@@ -204,21 +223,18 @@ grid-row:1/5 ; */
   letter-spacing: 2px;
   outline: none;
   border-radius: 25px;
-  transition: all .5s ease-in-out;
-  background-color: 
- #fff;
+  transition: all 0.5s ease-in-out;
+  background-color: #fff;
   padding-right: 40px;
-  color:
- #fff;
- }
- .wrap-input-17 .input-search::placeholder{
-  color:
- rgba(255,255,255,.5);
+  color: #fff;
+}
+.wrap-input-17 .input-search::placeholder {
+  color: rgba(255, 255, 255, 0.5);
   font-size: 18px;
   letter-spacing: 2px;
   font-weight: 100;
- }
- .wrap-input-17 .btn-search{
+}
+.wrap-input-17 .btn-search {
   width: 50px;
   height: 50px;
   border-style: none;
@@ -229,30 +245,24 @@ grid-row:1/5 ; */
   border-radius: 50%;
   position: absolute;
   right: 0px;
-  color:
- #ffffff ;
-  background-color:
- transparent;
-  pointer-events: painted;  
- }
- .wrap-input-17 .btn-search:focus ~ .input-search{
+  color: #ffffff;
+  background-color: transparent;
+  pointer-events: painted;
+}
+.wrap-input-17 .btn-search:focus ~ .input-search {
   width: 300px;
   border-radius: 0px;
-  background-color: 
- transparent;
-  border-bottom:1px solid 
- rgba(255,255,255,.5);
-  transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
- }
- .wrap-input-17 .input-search:focus{
+  background-color: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 500ms cubic-bezier(0, 0.11, 0.35, 2);
+}
+.wrap-input-17 .input-search:focus {
   width: 300px;
   border-radius: 0px;
-  background-color: 
- transparent;
-  border-bottom:1px solid 
- rgba(255,255,255,.5);
-  transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
- }
+  background-color: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 500ms cubic-bezier(0, 0.11, 0.35, 2);
+}
 
 @media (max-width: 1024px) {
   .addButton button {
@@ -295,7 +305,6 @@ grid-row:1/5 ; */
     margin-left: 0;
   }
 
-
   .name {
     font-size: 1rem;
   }
@@ -305,6 +314,6 @@ grid-row:1/5 ; */
   }
 
   .date p {
-    font-size: .7rem;
+    font-size: 0.7rem;
   }
 }

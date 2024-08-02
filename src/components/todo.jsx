@@ -20,19 +20,24 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { Link } from "react-router-dom";
-
+import UpdateModal from "./updateModal";
 import { MdDeleteForever } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import axios from "axios";
 import Skeleton from "@mui/material/Skeleton";
 import { toast } from "react-toastify";
+import {useParams} from "react-router-dom"
 
 function Todo() {
   const userId = localStorage.getItem("userId");
+  const username = sessionStorage.getItem("username");
   const [modal, setModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
   const [open, setOpen] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
+  const [currentTask, setCurrentTask] = useState();
+  const  {id}  = useParams();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState({
@@ -139,17 +144,33 @@ function Todo() {
     }
   };
 
-  const activateModal = () => {
+  const activateModal = (tasks) => {
+    setCurrentTask(tasks);
     setModal(true);
   };
 
   const deactivateModal = () => {
     setModal(false);
+    setCurrentTask(null);
+  };
+
+  const activateUpdateModal = () => {
+    useEffect(() => {
+      axios.get("http://localhost:3030/tasks" + id)
+      .then(res => setCurrentTask(res.data))
+      .catch(err=> console.log(err))
+    },[]);
+    updateModal(true)
   };
 
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <AccountCircleIcon sx={{ fontSize: 100 }} />
+      <br />
+      <p>Username: {username}</p>
+      <br />
+      <p>UserID: {userId}</p>
+      <br />
       <Link to={"/"}>Sign Out</Link>
     </Box>
   );
@@ -227,11 +248,12 @@ function Todo() {
                     }}
                   >
                     <p>
+                      {/* { task.taskDate.format("dddd MMM DD")} */}
                       <MdDeleteForever
                         id="delete"
                         onClick={() => handleDelete(task.id)}
                       />
-                      <FaEdit id="edit" />
+                      <FaEdit id="edit" onClick={() => activateUpdateModal()} />
                     </p>
                   </div>
                 </div>
@@ -245,6 +267,69 @@ function Todo() {
         </div>
 
         {modal && (
+          <div className="modal">
+            <div className="overlay" onClick={deactivateModal}></div>
+            <div className="modalContent">
+              <Box component="section" sx={{ p: 2, border: "1px dashed grey" }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DateCalendar
+                    disablePast
+                    name="taskDate"
+                    value={newTask.taskDate}
+                    onChange={handleDateChange}
+                  />
+                </LocalizationProvider>
+                <TextField
+                  id="filled-basic"
+                  label="Task name"
+                  variant="filled"
+                  name="taskName"
+                  value={newTask.taskName}
+                  onChange={handleChange}
+                />
+                <br />
+                <br />
+                <FormControl>
+                  <FormLabel id="demo-row-radio-buttons-group-label">
+                    Importance
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="demo-row-radio-buttons-group-label"
+                    name="importance"
+                    value={newTask.importance}
+                    onChange={handleImportanceChange}
+                  >
+                    <FormControlLabel
+                      value="very"
+                      control={<Radio />}
+                      label="Very"
+                    />
+                    <FormControlLabel
+                      value="slightly"
+                      control={<Radio />}
+                      label="Slightly"
+                    />
+                    <FormControlLabel
+                      value="average"
+                      control={<Radio />}
+                      label="Average"
+                    />
+                  </RadioGroup>
+                </FormControl>
+                <br />
+                <Button variant="outlined" onClick={handleSubmit}>
+                  ADD TASK
+                </Button>
+              </Box>
+              <div className="closeModal">
+                <ImCross onClick={deactivateModal} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {updateModal && (
           <div className="modal">
             <div className="overlay" onClick={deactivateModal}></div>
             <div className="modalContent">
