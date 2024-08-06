@@ -6,9 +6,6 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 
-
-// import {  useRouter } from 'react-router-dom'
-
 function SignUp() {
   const [user, setUser] = useState([]);
   const [currentUser, setCurrentUser] = useState({

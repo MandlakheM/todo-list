@@ -26,48 +26,51 @@ import { FaEdit } from "react-icons/fa";
 import Skeleton from "@mui/material/Skeleton";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
-import { initDB, getTasks, addTask, deleteTask } from "./database"; // Import the database functions
+import useDatabase from "../../database";
 
 function Todo() {
   const userId = localStorage.getItem("userId");
   const username = sessionStorage.getItem("username");
+  const db = useDatabase();
   const [modal, setModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [open, setOpen] = useState(false);
   const [tasks, setTasks] = useState([]);
-  const [filteredTasks, setFilteredTasks] = useState([]);
+  // const [filteredTasks, setFilteredTasks] = useState([]);
   const [currentTask, setCurrentTask] = useState();
-  const { id } = useParams();
-  const [search, setSearch] = useState("");
+  // const { id } = useParams();
+  // const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState({
     taskName: "",
-    taskTime: dayjs().format("HH:mm"),
-    taskDate: dayjs(),
+    taskTime: "",
+    taskDate: "", 
     importance: "",
     taskID: userId,
   });
 
-  useEffect(() => {
-    const initializeDB = async () => {
-      await initDB();
-      if (userId) {
-        const tasksFromDB = getTasks(userId);
-        setTasks(tasksFromDB);
-        setFilteredTasks(tasksFromDB);
-        setLoading(false);
-      }
-    };
-    initializeDB();
-  }, [userId]);
 
-  useEffect(() => {
-    setFilteredTasks(
-      tasks.filter((task) =>
-        task.taskName.toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }, [search, tasks]);
+  // useEffect(() => {
+  //   if (db) {
+  //     try {
+  //       const res = db.run(`SELECT * FROM tasks WHERE taskID = ${userId}`);
+  //       if (res.length > 0) {
+  //         setTasks(res[0].values);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching tasks:', error); 
+  //     }
+  //   }
+  // }, [db, userId]);
+
+
+  // useEffect(() => {
+  //   setFilteredTasks(
+  //     tasks.filter((task) =>
+  //       task.taskName.toLowerCase().includes(search.toLowerCase())
+  //     )
+  //   );
+  // }, [search, tasks]);
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -97,22 +100,29 @@ function Todo() {
   };
 
   const addTasks = () => {
-    if (newTask.taskName.trim() !== "") {
-      const updatedTasks = [...tasks, newTask];
-      setTasks(updatedTasks);
-      setFilteredTasks(updatedTasks);
-      addTask(newTask);
-      setNewTask({
-        taskName: "",
-        taskTime: dayjs().format("HH:mm"),
-        taskDate: dayjs(),
-        importance: "",
-        taskID: userId,
-      });
+    if (newTask.taskName.trim() !== '') {
+      try {
+        db.run(
+          'INSERT INTO tasks (taskName, importance, taskID) VALUES (?, ?, ?)',
+          [newTask.taskName, newTask.importance, newTask.taskID]
+        );
+        const idRes = db.exec('SELECT last_insert_rowid() AS id');
+        const id = idRes[0].values[0][0];
+        setTasks([...tasks, { ...newTask, id }]);
+        setNewTask({
+          taskName: '',
+          taskTime: '',
+          taskDate: '',
+          importance: '',
+          taskID: userId,
+        });
+      } catch (error) {
+        console.error('Error adding task:', error);
+      }
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = () => {
     event.preventDefault();
     addTasks();
     toast.success("Task added successfully");
@@ -120,14 +130,8 @@ function Todo() {
   };
 
   const handleDelete = (id) => {
-    const confirm = window.confirm("Do you want to delete this task?");
-    if (confirm) {
-      deleteTask(id);
-      const updatedTasks = tasks.filter((task) => task.id !== id);
-      setTasks(updatedTasks);
-      setFilteredTasks(updatedTasks);
-      toast.success("Task removed");
-    }
+    db.run(`DELETE FROM tasks WHERE id = ?`, [id]);
+    setTasks(tasks.filter((task) => task[0] !== id));
   };
 
   const activateModal = (tasks) => {
@@ -170,6 +174,7 @@ function Todo() {
         return "green";
     }
   };
+
 
   return (
     <div className="wrapper">
@@ -256,14 +261,14 @@ function Todo() {
             <div className="overlay" onClick={deactivateModal}></div>
             <div className="modalContent">
               <Box component="section" sx={{ p: 2, border: "1px dashed grey" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateCalendar
                     disablePast
                     name="taskDate"
                     value={newTask.taskDate}
                     onChange={handleDateChange}
                   />
-                </LocalizationProvider>
+                </LocalizationProvider> */}
                 <TextField
                   id="filled-basic"
                   label="Task name"
