@@ -23,10 +23,10 @@ import { Link } from "react-router-dom";
 import UpdateModal from "./updateModal";
 import { MdDeleteForever } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
-import axios from "axios";
 import Skeleton from "@mui/material/Skeleton";
 import { toast } from "react-toastify";
-import {useParams} from "react-router-dom"
+import { useParams } from "react-router-dom";
+import { initDB, getTasks, addTask, deleteTask } from "./database"; // Import the database functions
 
 function Todo() {
   const userId = localStorage.getItem("userId");
@@ -37,7 +37,7 @@ function Todo() {
   const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [currentTask, setCurrentTask] = useState();
-  const  {id}  = useParams();
+  const { id } = useParams();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState({
@@ -49,18 +49,16 @@ function Todo() {
   });
 
   useEffect(() => {
-    if (userId) {
-      fetch(`http://localhost:3030/tasks?taskID=${userId}`)
-        .then((res) => res.json())
-        .then((resp) => {
-          setTasks(resp);
-          setFilteredTasks(resp);
-          setLoading(false);
-        })
-        .catch((err) => {
-          toast.error(err.message);
-        });
-    }
+    const initializeDB = async () => {
+      await initDB();
+      if (userId) {
+        const tasksFromDB = getTasks(userId);
+        setTasks(tasksFromDB);
+        setFilteredTasks(tasksFromDB);
+        setLoading(false);
+      }
+    };
+    initializeDB();
   }, [userId]);
 
   useEffect(() => {
@@ -100,8 +98,10 @@ function Todo() {
 
   const addTasks = () => {
     if (newTask.taskName.trim() !== "") {
-      setTasks((prevTasks) => [...prevTasks, newTask]);
-      setFilteredTasks((prevTasks) => [...prevTasks, newTask]);
+      const updatedTasks = [...tasks, newTask];
+      setTasks(updatedTasks);
+      setFilteredTasks(updatedTasks);
+      addTask(newTask);
       setNewTask({
         taskName: "",
         taskTime: dayjs().format("HH:mm"),
@@ -115,32 +115,18 @@ function Todo() {
   const handleSubmit = (event) => {
     event.preventDefault();
     addTasks();
-    axios
-      .post("http://localhost:3030/tasks", newTask)
-      .then((res) => {
-        toast.success("Task added successfully");
-      })
-      .catch((err) => {
-        toast.error(err.message);
-      });
+    toast.success("Task added successfully");
     setModal(false);
   };
 
   const handleDelete = (id) => {
     const confirm = window.confirm("Do you want to delete this task?");
     if (confirm) {
-      axios
-        .delete(`http://localhost:3030/tasks/${id}`)
-        .then((res) => {
-          toast.success("Task removed");
-          setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-          setFilteredTasks((prevTasks) =>
-            prevTasks.filter((task) => task.id !== id)
-          );
-        })
-        .catch((err) => {
-          toast.error(err.message);
-        });
+      deleteTask(id);
+      const updatedTasks = tasks.filter((task) => task.id !== id);
+      setTasks(updatedTasks);
+      setFilteredTasks(updatedTasks);
+      toast.success("Task removed");
     }
   };
 
@@ -156,11 +142,10 @@ function Todo() {
 
   const activateUpdateModal = () => {
     useEffect(() => {
-      axios.get("http://localhost:3030/tasks" + id)
-      .then(res => setCurrentTask(res.data))
-      .catch(err=> console.log(err))
-    },[]);
-    updateModal(true)
+      const taskToUpdate = tasks.find((task) => task.id === parseInt(id));
+      setCurrentTask(taskToUpdate);
+    }, [id]);
+    setUpdateModal(true);
   };
 
   const DrawerList = (

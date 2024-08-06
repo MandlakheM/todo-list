@@ -7,6 +7,8 @@ import UpdateModal from "./components/updateModal";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// import sqlite3 from 'sqlite3'
+// const db = new sqlite3.Database('./test')
 
 function App() {
   return (
