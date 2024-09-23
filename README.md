@@ -31,6 +31,8 @@ ii)Delete Function: Users can delete existing items from the to-do list.
 
 ## SCREENSHOT
 
+![Screenshot 2024-09-23 151548](https://github.com/user-attachments/assets/37169454-e70d-4ca5-a50e-7ffb2155dcc9)
+
 
 
 ## Installation 
