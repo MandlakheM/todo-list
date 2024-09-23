@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./logIn.css";
 
-function LogIn() {
+function LogIn({ db, setUser }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -19,31 +19,17 @@ function LogIn() {
     event.preventDefault();
 
     if (username.trim() !== "" && password.trim() !== "") {
-      fetch(`http://localhost:3030/users`)
-        .then((res) => res.json())
-        .then((resp) => {
-          console.log("Response from server:", resp);
-
-          const user = resp.find((user) => user.username === username);
-
-          if (user) {
-            console.log("Found user:", user); 
-
-            if (user.password === password) {
-              toast.success("Sign In successful");
-              sessionStorage.setItem("username", user.username);
-              localStorage.setItem("userId", user.userId);
-              navigate("/todo");
-            } else {
-              toast.error("Incorrect password");
-            }
-          } else {
-            toast.error("User not found");
-          }
-        })
-        .catch((err) => {
-          toast.error("Login failed due to: " + err.message);
-        });
+      if (db) {
+        const result = db.exec(`SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`);
+        if (result.length > 0) {
+          setUser(result[0].values[0]);
+          navigate('/todo');
+        } else {
+          alert('Invalid credentials');
+        }
+      } else {
+        alert('Database not initialized');
+      }
     } else {
       toast.error("Username and password cannot be empty");
     }

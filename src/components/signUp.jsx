@@ -6,45 +6,44 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 
-function SignUp() {
-  const [user, setUser] = useState([]);
-  const [currentUser, setCurrentUser] = useState({
-    username: "",
-    password: "",
-    userId: dayjs(),
-  });
+function SignUp({ db }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const userId = dayjs();
+
+  // const [currentUser, setCurrentUser] = useState({
+  //   username: "",
+  //   password: "",
+  //   userId: dayjs(),
+  // });
 
   const navigate = useNavigate();
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    setCurrentUser((prevUser) => ({
-      ...prevUser,
-      [name]: value,
-    }));
-  }
+  // function handleChange(event) {
+  //   const { name, value } = event.target;
+  //   setCurrentUser((prevUser) => ({
+  //     ...prevUser,
+  //     [name]: value,
+  //   }));
+  // }
 
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (
-      currentUser.username.trim() !== "" &&
-      currentUser.password.trim() !== ""
-    ) {
-      setUser((prevUser) => [...prevUser, currentUser]);
-      setCurrentUser({
-        username: "",
-        password: "",
-      });
-      axios
-        .post("http://localhost:3030/users", currentUser)
-        .then((res) => {
-          toast.success("User SignUp successful");
+    if (username.trim() !== "" && password.trim() !== "") {
+      if (db) {
+        try {
+          db.run(
+            `INSERT INTO users (username, password) VALUES ('${username}', '${password}')`
+          );
+          alert("Registration successful");
           navigate("/");
-        })
-        .catch((err) => {
-          toast.error("SignUp Failed due to :" + err.message);
-        });
+        } catch (error) {
+          alert("Registration failed. Username may already exist.");
+        }
+      } else {
+        alert("Database not initialized");
+      }
     }
   }
 
@@ -65,14 +64,14 @@ function SignUp() {
                 name="username"
                 id="username"
                 placeholder="username"
-                onChange={handleChange}
+                onChange={(e) => setUsername(e.target.value)}
                 required={true}
               />
               <input
                 type="password"
                 name="password"
                 id=""
-                onChange={handleChange}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="password"
                 required={true}
               />
