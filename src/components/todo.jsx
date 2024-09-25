@@ -20,24 +20,21 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { Link } from "react-router-dom";
-import UpdateModal from "./updateModal";
 import { MdDeleteForever } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import axios from "axios";
 import Skeleton from "@mui/material/Skeleton";
 import { toast } from "react-toastify";
-import {useParams} from "react-router-dom"
+import { useParams } from "react-router-dom";
 
 function Todo() {
   const userId = localStorage.getItem("userId");
   const username = sessionStorage.getItem("username");
   const [modal, setModal] = useState(false);
-  const [updateModal, setUpdateModal] = useState(false);
   const [open, setOpen] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
-  const [currentTask, setCurrentTask] = useState();
-  const  {id}  = useParams();
+  const [currentTask, setCurrentTask] = useState("");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState({
@@ -71,6 +68,13 @@ function Todo() {
     );
   }, [search, tasks]);
 
+  // useEffect(() => {
+  //   axios
+  //     .get("http://localhost:3030/tasks" + id)
+  //     .then((res) => setCurrentTask(res.data))
+  //     .catch((err) => console.log(err));
+  // }, []);
+
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
@@ -100,32 +104,76 @@ function Todo() {
 
   const addTasks = () => {
     if (newTask.taskName.trim() !== "") {
-      setTasks((prevTasks) => [...prevTasks, newTask]);
-      setFilteredTasks((prevTasks) => [...prevTasks, newTask]);
-      setNewTask({
-        taskName: "",
-        taskTime: dayjs().format("HH:mm"),
-        taskDate: dayjs(),
-        importance: "",
+      const taskToAdd = {
+        ...newTask,
         taskID: userId,
-      });
+      };
+  
+      axios.post('http://localhost:3030/tasks', taskToAdd)
+        .then(res => {
+          setTasks(prevTasks => [...prevTasks, res.data]);
+          setFilteredTasks(prevTasks => [...prevTasks, res.data]);
+          setNewTask({
+            taskName: "",
+            taskTime: dayjs().format("HH:mm"),
+            taskDate: dayjs(),
+            importance: "",
+            taskID: userId,
+          });
+          toast.success("Task added successfully");
+        })
+        .catch(err => {
+          toast.error("Failed to add task: " + err.message);
+        });
     }
   };
-
+  
   const handleSubmit = (event) => {
     event.preventDefault();
-    addTasks();
-    axios
-      .post("http://localhost:3030/tasks", newTask)
-      .then((res) => {
-        toast.success("Task added successfully");
-      })
-      .catch((err) => {
-        toast.error(err.message);
-      });
+  
+    if (currentTask && currentTask.id) {
+      updateTask();
+    } else {
+      addTasks();
+    }
     setModal(false);
   };
-
+  
+  const updateTask = () => {
+    if (!currentTask || !currentTask.id) {
+      toast.error("Cannot update task: Invalid task ID");
+      return;
+    }
+  
+    const updatedTask = {
+      ...newTask,
+      taskName: newTask.taskName || currentTask.taskName,
+      taskDate: newTask.taskDate || currentTask.taskDate,
+      importance: newTask.importance || currentTask.importance,
+    };
+  
+    axios
+      .put(`http://localhost:3030/tasks/${currentTask.id}`, updatedTask)
+      .then((res) => {
+        toast.success("Task updated successfully");
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === currentTask.id ? res.data : task
+          )
+        );
+        setFilteredTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === currentTask.id ? res.data : task
+          )
+        );
+        setCurrentTask(""); 
+      })
+      .catch((err) => {
+        toast.error("Failed to update task: " + err.message);
+      });
+  };
+  
+  
   const handleDelete = (id) => {
     const confirm = window.confirm("Do you want to delete this task?");
     if (confirm) {
@@ -151,17 +199,12 @@ function Todo() {
 
   const deactivateModal = () => {
     setModal(false);
-    setCurrentTask(null);
+    setCurrentTask("");
   };
 
-  const activateUpdateModal = () => {
-    useEffect(() => {
-      axios.get("http://localhost:3030/tasks" + id)
-      .then(res => setCurrentTask(res.data))
-      .catch(err=> console.log(err))
-    },[]);
-    updateModal(true)
-  };
+  // const activateUpdateModal = () => {
+  //   updateModal(true);
+  // };
 
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
@@ -253,7 +296,7 @@ function Todo() {
                         id="delete"
                         onClick={() => handleDelete(task.id)}
                       />
-                      <FaEdit id="edit" onClick={() => activateUpdateModal()} />
+                      <FaEdit id="edit" onClick={() => activateModal(task)} />
                     </p>
                   </div>
                 </div>
@@ -284,7 +327,11 @@ function Todo() {
                   label="Task name"
                   variant="filled"
                   name="taskName"
-                  value={newTask.taskName}
+                  value={
+                    currentTask
+                      ? newTask.taskName || currentTask.taskName
+                      : newTask.taskName
+                  }
                   onChange={handleChange}
                 />
                 <br />
@@ -297,7 +344,11 @@ function Todo() {
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
                     name="importance"
-                    value={newTask.importance}
+                    value={
+                      currentTask
+                        ? newTask.importance || currentTask.importance
+                        : newTask.importance
+                    }
                     onChange={handleImportanceChange}
                   >
                     <FormControlLabel
@@ -319,70 +370,7 @@ function Todo() {
                 </FormControl>
                 <br />
                 <Button variant="outlined" onClick={handleSubmit}>
-                  ADD TASK
-                </Button>
-              </Box>
-              <div className="closeModal">
-                <ImCross onClick={deactivateModal} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {updateModal && (
-          <div className="modal">
-            <div className="overlay" onClick={deactivateModal}></div>
-            <div className="modalContent">
-              <Box component="section" sx={{ p: 2, border: "1px dashed grey" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DateCalendar
-                    disablePast
-                    name="taskDate"
-                    value={newTask.taskDate}
-                    onChange={handleDateChange}
-                  />
-                </LocalizationProvider>
-                <TextField
-                  id="filled-basic"
-                  label="Task name"
-                  variant="filled"
-                  name="taskName"
-                  value={newTask.taskName}
-                  onChange={handleChange}
-                />
-                <br />
-                <br />
-                <FormControl>
-                  <FormLabel id="demo-row-radio-buttons-group-label">
-                    Importance
-                  </FormLabel>
-                  <RadioGroup
-                    row
-                    aria-labelledby="demo-row-radio-buttons-group-label"
-                    name="importance"
-                    value={newTask.importance}
-                    onChange={handleImportanceChange}
-                  >
-                    <FormControlLabel
-                      value="very"
-                      control={<Radio />}
-                      label="Very"
-                    />
-                    <FormControlLabel
-                      value="slightly"
-                      control={<Radio />}
-                      label="Slightly"
-                    />
-                    <FormControlLabel
-                      value="average"
-                      control={<Radio />}
-                      label="Average"
-                    />
-                  </RadioGroup>
-                </FormControl>
-                <br />
-                <Button variant="outlined" onClick={handleSubmit}>
-                  ADD TASK
+                  {currentTask ? "UPDATE TASK" : "ADD TASK"}
                 </Button>
               </Box>
               <div className="closeModal">
