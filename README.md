@@ -55,8 +55,6 @@ cd projectname
 
 npm install
 
-# Start the JSON-server on your CMD
+# Run the development environment
 
-json-server --watch db.json --port 3030
-
-npm run dev
+npm start
