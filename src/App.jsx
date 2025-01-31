@@ -38,14 +38,24 @@ function App() {
   return (
     <>
       <ToastContainer />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LogIn db={db} setUser={setUser} />}></Route>
-          <Route path="/signUp" element={<SignUp db={db} />}></Route>
-          <Route path="/todo" element={<Todo db={db} user={user} />}></Route>
-          {/* <Route path="/updateModal" element={<UpdateModal />}></Route> */}
-        </Routes>
-      </BrowserRouter>
+      {db ? (
+        <BrowserRouter>
+          <Routes>
+            <Route
+              path="/"
+              element={<LogIn db={db} setUser={setUser} />}
+            ></Route>
+            <Route path="/signUp" element={<SignUp db={db} />}></Route>
+            <Route path="/todo" element={<Todo db={db} user={user} />}></Route>
+            {/* <Route path="/updateModal" element={<UpdateModal />}></Route> */}
+          </Routes>
+        </BrowserRouter>
+      ) : (
+        <div className="loaderCont">
+          <div className="loader"> </div>
+          <p>Connecting to the database...</p>
+        </div>
+      )}
     </>
   );
 }
