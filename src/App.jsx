@@ -14,7 +14,9 @@ function App() {
 
   useEffect(() => {
     const initDb = async () => {
-      const SQL = await initSqlJs();
+      const SQL = await initSqlJs({ 
+  locateFile: (file) => `/sql-wasm.wasm` 
+});
       const database = new SQL.Database();
       database.run(`
         CREATE TABLE IF NOT EXISTS users (
