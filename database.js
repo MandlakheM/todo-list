@@ -7,7 +7,7 @@ const useDatabase = () => {
 
   useEffect(() => {
     const initDatabase = async () => {
-      const SQL = await initSqlJs({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/${file}`});
+      const SQL = await initSqlJs({ locateFile: (file) => `/sql-wasm.wasm`});
       const db = new SQL.Database();
       setDb(db);
 
