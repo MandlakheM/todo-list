@@ -8,10 +8,10 @@
 This is a todo web app that allows users to: 
 
 
-i) to log in with their credentials.c
+i) to log in with their credentials
 
 
-ii) new users can register with the following details:
+ii) new users can register with the following details: username and password
 
 
 To-Do List Features:
